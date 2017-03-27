@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Level StartPosition="900 800" Name="Mt. Fuji">
+  <Brick Size="Big" Orientation="Horizontal" Breakable="True" Position="835 500" Prize="Shield"/>
+  <Brick Size="Big" Orientation="Horizontal" Breakable="True" Position="965 500" Prize="ExtraTime"/>
+  <Ball Size="XL" Type="Blue" Position="100 100"/>
+</Level>

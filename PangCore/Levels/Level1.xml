@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Level StartPosition="900 800" Name="Mt. Fuji">
+  <Ball Size="XL" Type="Red" Position="100 100"/>
+</Level>

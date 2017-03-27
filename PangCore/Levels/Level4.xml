@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Level StartPosition="800 800" Name="Mt. Keirin">
+  <Brick Size="Big" Orientation="Vertical" Breakable="False" Position="905 750" Prize="None"/>
+  <Brick Size="Big" Orientation="Vertical" Breakable="False" Position="933 750" Prize="None"/>
+  <Ball Size="XL" Type="Red" Position="700 100"/>
+
+  <Ladder Position="810 745" Size="95 300"/>
+  <Ladder Position="960 745" Size="95 300"/>
+</Level>
