@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright (c) 2017 - Iñaki Ayucar
+// Copyright (c) 2017 - Inaki Ayucar
 // 
 // Please note: All original arcade game assets are property of their respective 
 //              owners. They are currently available at www.spriters-resource.com 
