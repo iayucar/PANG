@@ -50,8 +50,6 @@ namespace SMX
         public RendererGDI()
         {
             mTextFont = new Font("Arial", 16, FontStyle.Bold);
-
-            RendererBase.Ref = this;
         }
         /// <summary>
         /// 

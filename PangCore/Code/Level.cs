@@ -52,6 +52,22 @@ namespace SMX
         /// </summary>
         public System.IO.Stream mBackgroundTextureStream;
         /// <summary>
+        /// Background music sound name
+        /// </summary>
+        public string mBackgroundMusicSoundName = "";
+        /// <summary>
+        /// Special music when time is up
+        /// </summary>
+        public static string mHurryUpMusicSoundName= "";
+        /// <summary>
+        /// Special music when time is up
+        /// </summary>
+        public static string mTimeIsAlmostOverMusicSoundName = "";
+        /// <summary>
+        /// Private filed to store the sound stream
+        /// </summary>
+        private System.IO.Stream mBackgroundMusicSoundStream;
+        /// <summary>
         /// List of balls currently present in the level
         /// </summary>
         public List<Ball> mBalls = new List<Ball>();
@@ -79,6 +95,10 @@ namespace SMX
         /// Actual counter of the time remaining
         /// </summary>
         public float mTimeRemainingSecs = 90;
+        /// <summary>
+        /// Level state according to time remaining
+        /// </summary>
+        public eLevelTimeState mTimeState = eLevelTimeState.Normal;
         /// <summary>
         /// Time where the balls are paused
         /// </summary>
@@ -129,6 +149,26 @@ namespace SMX
             mBackgroundTextureStream = assembly.GetManifestResourceStream(mBackgroundResourceName);
             RendererBase.Ref.LoadTexture(mBackgroundResourceName, mBackgroundTextureStream);
 
+            // Load Music
+            if (!String.IsNullOrEmpty(mBackgroundMusicSoundName))
+            {
+                mBackgroundMusicSoundStream = assembly.GetManifestResourceStream(mBackgroundMusicSoundName);
+                SoundBase.Ref.LoadSound(mBackgroundMusicSoundName, mBackgroundMusicSoundStream);
+            }
+
+            // Initialize global music files
+            if (string.IsNullOrEmpty(mHurryUpMusicSoundName))
+            {
+                mHurryUpMusicSoundName = Game.ResourcesNameSpace + ".Sounds.arcade-01b-getting-late.wav";
+                SoundBase.Ref.LoadSound(mHurryUpMusicSoundName);
+            }
+            if (string.IsNullOrEmpty(mTimeIsAlmostOverMusicSoundName))
+            {
+                mTimeIsAlmostOverMusicSoundName = Game.ResourcesNameSpace + ".Sounds.arcade-01c-out-of-time.wav";
+                SoundBase.Ref.LoadSound(mTimeIsAlmostOverMusicSoundName);
+            }
+
+
             // Load contents for each element in level
             foreach (Brick brk in mBricks)
                 brk.LoadContents();
@@ -136,6 +176,19 @@ namespace SMX
                 b.LoadContents();
             foreach (Ladder l in mLadders)
                 l.LoadContents();
+        }
+        /// <summary>
+        /// Occurs when the level is about to be played
+        /// </summary>
+        public void Reset()
+        {
+            mTimeRemainingSecs = mTimeRemainingInitialSecs;
+            mTimeState = eLevelTimeState.Normal;
+
+            SoundBase.Ref.StopAllSounds();
+
+            if (!String.IsNullOrEmpty(mBackgroundMusicSoundName))
+                SoundBase.Ref.PlaySound(mBackgroundMusicSoundName, true);
         }
         /// <summary>
         /// 
@@ -281,11 +334,44 @@ namespace SMX
         /// <param name="pDt"></param>
         public void OnFrameMove(float pDt)
         {
+           
             // Check level complete
             if (mBalls.Count == 0)
             {
                 Game.LevelComplete();
                 return;
+            }
+
+            // Manage remaining Time
+            mTimeRemainingSecs -= pDt;
+            if (mTimeRemainingSecs <= 0)
+            {
+                Game.mPlayer.LifeDown();
+                mTimeRemainingSecs = mTimeRemainingInitialSecs;
+                mTimeState = eLevelTimeState.Normal;
+                
+                // Make the level re-start in pause mode
+                Game.mPlayer.CollectPrize(Prize.ePrize.Pause);
+            }
+            else if (mTimeRemainingSecs <= 10)
+            {
+                if (mTimeState != eLevelTimeState.TimeAlmostUp)
+                {
+                    mTimeState = eLevelTimeState.TimeAlmostUp;
+                    SoundBase.Ref.StopSound(mBackgroundMusicSoundName);
+                    SoundBase.Ref.StopSound(Level.mHurryUpMusicSoundName);
+                    SoundBase.Ref.PlaySound(Level.mTimeIsAlmostOverMusicSoundName);
+                }
+            }
+            else if (mTimeRemainingSecs <= 30)
+            {
+                if (mTimeState != eLevelTimeState.HurryUp)
+                {
+                    mTimeState = eLevelTimeState.HurryUp;
+                    SoundBase.Ref.StopSound(mBackgroundMusicSoundName);
+                    SoundBase.Ref.StopSound(Level.mTimeIsAlmostOverMusicSoundName);
+                    SoundBase.Ref.PlaySound(Level.mHurryUpMusicSoundName);
+                }
             }
 
             // Manage pause time
@@ -392,7 +478,6 @@ namespace SMX
             // Draw background first (so everything else is drawn on top of it)
             RendererBase.Ref.DrawSprite(mBackgroundResourceName, 0, 0, Game.DefaultGameWidth, Game.DefaultGameHeight);
 
-
             foreach (Ladder lad in mLadders)
                 lad.OnFrameRender();
 
@@ -420,6 +505,14 @@ namespace SMX
         public static Level FromXml(System.Xml.XmlNode pLevelNd)
         {
             Level lev = new Level();
+
+            lev.mTimeRemainingInitialSecs = lev.mTimeRemainingSecs = 90;
+            if (pLevelNd.Attributes["MaxTime"] != null)
+                lev.mTimeRemainingInitialSecs = lev.mTimeRemainingSecs = int.Parse(pLevelNd.Attributes["MaxTime"].Value);
+
+            lev.mBackgroundMusicSoundName = "";
+            if (pLevelNd.Attributes["BackgroundMusicSoundName"] != null)
+                lev.mBackgroundMusicSoundName = Game.ResourcesNameSpace + ".Sounds." + pLevelNd.Attributes["BackgroundMusicSoundName"].Value;
 
             lev.InitialPlayerPos = Vector2.ReadVector2FromXmlAttribute(pLevelNd, "StartPosition");
             lev.mName = pLevelNd.Attributes["Name"].Value;

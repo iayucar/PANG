@@ -32,60 +32,65 @@ using System.Threading.Tasks;
 
 namespace SMX
 {
-    /// <summary>
-    /// Size of text to be drawn on the screen
-    /// </summary>
-    public enum eTextSize
-    {
-        _14 = 14,
-        _16 = 16,
-        _18 = 18,
-        _20 = 20,
-        _22 = 22,
-        _24 = 24,
-        _26 = 26,
-        _28 = 28,
-    }
-    /// <summary>
-    /// Possible sizes of balls in game
-    /// </summary>
-    public enum eBallSize
-    {
-        XL,
-        L,
-        M,
-        S
-    }
-    /// <summary>
-    /// Types of balls in game
-    /// </summary>
-    public enum eBallType
-    {
-        Red,
-        Green,
-        Blue,
-    }
-    /// <summary>
-    /// Possible orientations of bricks
-    /// </summary>
-    public enum eBrickOrientation
-    {
-        Horizontal,
-        Vertical,
-    }
-    /// <summary>
-    /// Size of bricks in game
-    /// </summary>
-    public enum eBrickSize
-    {
-        Big,
-        Med,
-        Small,
-    }
-    public enum eLevelTimeState
-    {
-        Normal,
-        HurryUp,
-        TimeAlmostUp,
+    public class SoundBase
+    {       
+        public static SoundBase Ref;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public SoundBase()
+        {
+            Ref = this;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void Dispose()
+        {
+        }
+        /// <summary>
+        /// Loads a texture
+        /// </summary>
+        /// <param name="pTextureName"></param>
+        /// <param name="pStream"></param>
+        public void LoadSound(string pSoundName)
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.IO.Stream strm = assembly.GetManifestResourceStream(pSoundName);
+            LoadSound(pSoundName, strm);
+        }
+       
+        /// <summary>
+        /// Loads a texture
+        /// </summary>
+        /// <param name="pTextureName"></param>
+        /// <param name="pStream"></param>
+        public virtual void LoadSound(string pSoundName, System.IO.Stream pStream)
+        {
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pSoundName"></param>
+        public virtual void PlaySound(string pSoundName, bool pLooping = false)
+        {
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void StopAllSounds()
+        {
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pSoundName"></param>
+        public virtual void StopSound(string pSoundName)
+        {
+
+        }
     }
 }

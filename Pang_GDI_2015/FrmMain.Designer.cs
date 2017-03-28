@@ -42,7 +42,6 @@
             this.doubleBufferPanel1.Size = new System.Drawing.Size(756, 479);
             this.doubleBufferPanel1.TabIndex = 0;
             this.doubleBufferPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.doubleBufferPanel1_Paint);
-            this.doubleBufferPanel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.doubleBufferPanel1_MouseDown);
             this.doubleBufferPanel1.Resize += new System.EventHandler(this.doubleBufferPanel1_Resize);
             // 
             // FrmMain

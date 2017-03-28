@@ -220,14 +220,16 @@ namespace SMX
         public void HitByBall()
         {
             if (mShieldActive)
-            {
                 mShieldActive = false;
-            }
-            else
-            {
-                mNumLives--;
-                this.State = eState.Dying;
-            }
+            else LifeDown();
+        }
+        /// <summary>
+        /// Player loses one life
+        /// </summary>
+        public void LifeDown()
+        {
+            mNumLives--;
+            this.State = eState.Dying;
         }
         /// <summary>
         /// 
@@ -322,7 +324,7 @@ namespace SMX
                     mTimeDying = 0;
 
                     if (mNumLives <= 0)
-                        Game.PlayerDied();
+                        Game.FireGameOverEvent();
                     else RecoverPlayer();
                     return;
                 }

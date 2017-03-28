@@ -40,6 +40,14 @@ namespace SMX
         public int mScreenWidth, mScreenHeight;
         public static RendererBase Ref;
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public RendererBase()
+        {
+            Ref = this;
+        }
         /// <summary>
         /// 
         /// </summary>

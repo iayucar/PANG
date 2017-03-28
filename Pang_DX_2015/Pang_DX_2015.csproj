@@ -7,7 +7,7 @@
     <ProjectGuid>{1D0ADCC6-730D-45A0-86AF-882FCA316367}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SimplePang</RootNamespace>
+    <RootNamespace>SMX</RootNamespace>
     <AssemblyName>Pang_GDI_2015</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -98,6 +98,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RendererDX.cs" />
+    <Compile Include="SoundWPF.cs" />
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>

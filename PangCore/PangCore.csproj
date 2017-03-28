@@ -67,6 +67,7 @@
     <Compile Include="Maths\Vector2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Render\RendererBase.cs" />
+    <Compile Include="Sound\SoundBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Arrow_1.png" />
@@ -112,6 +113,26 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Levels\Level4.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-01a-mt.-fuji.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-01d-level-complete.mp3" />
+    <EmbeddedResource Include="Sounds\arcade-01e-continue.mp3" />
+    <EmbeddedResource Include="Sounds\arcade-01f-game-over.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-02-mt.-keirin.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-01b-getting-late.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-01c-out-of-time.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sounds\arcade-03-emerald-temple.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

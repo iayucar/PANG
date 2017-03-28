@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Level StartPosition="900 800" Name="Mt. Fuji">
+<Level StartPosition="900 800" Name="Mt. Fuji" MaxTime="60" BackgroundMusicSoundName="arcade-01a-mt.-fuji.wav">
   <Brick Size="Big" Orientation="Horizontal" Breakable="True" Position="900 400" Prize="Pause"/>
   <Brick Size="Big" Orientation="Horizontal" Breakable="True" Position="900 700" Prize="ExtraLife"/>
   <Brick Size="Big" Orientation="Horizontal" Breakable="False" Position="300 400" Prize="None"/>

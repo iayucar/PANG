@@ -93,8 +93,6 @@ namespace SMX
         /// </summary>
         public RendererDX(SMX.DoubleBufferPanel pRenderPanel)
         {
-            RendererBase.Ref = this;
-
             mRenderPanel = pRenderPanel;
 
             // Init D3D: fixed rendering at 1920x1080

@@ -70,16 +70,20 @@ namespace SMX
         /// <summary>
         /// Index of the current level actually being played
         /// </summary>
-        public static int mCurrentLevel = 0;
+        public static int mCurrentLevelIdx = 0;
+        /// <summary>
+        /// Event raised when the game ends
+        /// </summary>
+        public static event System.EventHandler GameOver = null;
 
         #region Props
         public static Level CurrentLevel
         {
             get
             {
-                if (mCurrentLevel < 0 || mCurrentLevel > mLevels.Count - 1)
+                if (mCurrentLevelIdx < 0 || mCurrentLevelIdx > mLevels.Count - 1)
                     return null;
-                else return mLevels[mCurrentLevel];
+                else return mLevels[mCurrentLevelIdx];
             }
         }
         public static int DefaultGameWidth
@@ -97,25 +101,25 @@ namespace SMX
         /// <summary>
         /// 
         /// </summary>
-        public static void PlayerDied()
+        public static void FireGameOverEvent()
         {
-            //mFrmMain.GameOver();
+            if (GameOver != null)
+                GameOver(null, EventArgs.Empty);
         }
         /// <summary>
         /// 
         /// </summary>
         public static void LevelComplete()
         {
-            if (mCurrentLevel < mLevels.Count - 1)
+            if (mCurrentLevelIdx < mLevels.Count - 1)
             {
                 // Level Finished
-                mCurrentLevel++;
-                InitLevel(mCurrentLevel);
+                mCurrentLevelIdx++;
+                InitLevel(mCurrentLevelIdx);
             }
             else
             {
-                // Game Finished
-                //mFrmMain.GameOver();
+                FireGameOverEvent();
             }
         }
         /// <summary>
@@ -182,7 +186,7 @@ namespace SMX
             if (mLevels == null || mLevels.Count == 0)
                 LoadLevels();
 
-            InitLevel(2);
+            InitLevel(0);
         }
         /// <summary>
         /// Sets a level index, and resets player position
@@ -190,7 +194,8 @@ namespace SMX
         /// <param name="pLevelIdx"></param>
         public static void InitLevel(int pLevelIdx)
         {
-            mCurrentLevel = pLevelIdx;
+            mCurrentLevelIdx = pLevelIdx;
+            CurrentLevel.Reset();
             mPlayer.mPos = CurrentLevel.InitialPlayerPos;
         }
         /// <summary>
