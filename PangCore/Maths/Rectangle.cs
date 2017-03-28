@@ -299,34 +299,34 @@ namespace SMX.Maths
         /// <summary>
         /// Determines if the rectangle is intersecting with a circle, and return the collision normal if so
         /// </summary>
-        /// <param name="circle_x"></param>
-        /// <param name="circle_y"></param>
-        /// <param name="circle_r"></param>
+        /// <param name="pX"></param>
+        /// <param name="pY"></param>
+        /// <param name="pRadius"></param>
         /// <returns></returns>
-        public Vector2? IntersectsCircle(float circle_x, float circle_y, float circle_r)
+        public Vector2? IntersectsCircle(Vector2 pCirclePos, float pRadius)
         {
             // compute a center-to-center vector
             Vector2 half = new Vector2((float)this.Width / 2f, (float)this.Height / 2f);
-            Vector2 center = new Vector2(circle_x - ((float)this.X + half.X), circle_y - ((float)this.Y + half.Y));
+            Vector2 center = new Vector2(pCirclePos.X - ((float)this.X + half.X), pCirclePos.Y - ((float)this.Y + half.Y));
             Vector2 side = new Maths.Vector2(Math.Abs(center.X) - half.X, Math.Abs(center.Y) - half.Y);
 
-            if (side.X > circle_r || side.Y > circle_r) // outside
+            if (side.X > pRadius || side.Y > pRadius) // outside
                 return null;
-            if (side.X < -circle_r && side.Y < -circle_r) // inside
+            if (side.X < -pRadius && side.Y < -pRadius) // inside
                 return new Vector2(0, 1);
             if (side.X < 0 || side.Y < 0) // intersects side or corner
             {
                 float dxx = 0, dyy = 0;
-                if (Math.Abs(side.X) <= circle_r && side.Y < 0)
+                if (Math.Abs(side.X) <= pRadius && side.Y < 0)
                     dxx = center.X * side.X < 0 ? -1 : 1;
-                else if (Math.Abs(side.Y) <= circle_r && side.X < 0)
+                else if (Math.Abs(side.Y) <= pRadius && side.X < 0)
                     dyy = center.Y * side.Y < 0 ? -1 : 1;
 
                 return new Vector2(dxx, dyy);
             }
 
             // circle is near the corner
-            bool isbounce = side.X * side.X + side.Y * side.Y < circle_r * circle_r;
+            bool isbounce = side.X * side.X + side.Y * side.Y < pRadius * pRadius;
             if (!isbounce)
                 return null;
             

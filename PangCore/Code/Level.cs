@@ -146,7 +146,7 @@ namespace SMX
         {
             Rectangle arrowRect = a.mDrawRectangle.Clone();
             arrowRect.Width -= 10;
-            if (arrowRect.IntersectsCircle(b.Center.X, b.Center.Y, b.Radius).HasValue)
+            if (arrowRect.IntersectsCircle(b.Center, b.Radius).HasValue)
             {
                 ArrowDied(a);
 
@@ -221,27 +221,20 @@ namespace SMX
             // Create 2 new balls
             if (b.BallSize != eBallSize.S)
             {
+                eBallSize newSize = Ball.GetNextSize(b.BallSize);
+                float newVerticalVelocity = -Math.Min(Math.Abs(b.mVelocity.Y), Ball.GetMaxVelY(newSize));
 
-                Ball b1 = new Ball(Ball.GetNextSize(b.BallSize), b.BallType);
+                Ball b1 = new Ball(newSize, b.BallType);
                 b1.LoadContents();
-                b1.mPos = b.mPos;
-                b1.mVelocity = b.mVelocity;
-                if (b1.mVelocity.Y > 0)
-                    b1.mVelocity.Y *= -1;
-                if (b1.mVelocity.X > 0)
-                    b1.mPos.X += b1.Radius;
-                else b1.mPos.X -= b1.Radius;
+                b1.mPos = b.Center - new Maths.Vector2(b1.Radius * 2f, b1.Radius);
+                b1.mVelocity.X = -Math.Abs(b.mVelocity.X);
+                b1.mVelocity.Y = newVerticalVelocity;
 
-                Ball b2 = new Ball(Ball.GetNextSize(b.BallSize), b.BallType);
+                Ball b2 = new Ball(newSize, b.BallType);
                 b2.LoadContents();
-                b2.mPos = b.mPos;
-                b2.mVelocity = b.mVelocity;
-                b2.mVelocity.X *= -1;
-                if (b2.mVelocity.Y > 0)
-                    b2.mVelocity.Y *= -1;
-                if (b1.mVelocity.X > 0)
-                    b1.mPos.X += b1.Radius;
-                else b1.mPos.X -= b1.Radius;
+                b2.mPos = b.Center + new Maths.Vector2(0, -b2.Radius);
+                b2.mVelocity.X = Math.Abs(b.mVelocity.X);
+                b2.mVelocity.Y = newVerticalVelocity;
 
                 // First call to OnFrameMove to update positions and velocities
                 b1.OnFrameMove(0.001f);
@@ -271,7 +264,7 @@ namespace SMX
             // Leave some margin to be less strict in the intersections
             Rectangle playerRect = pPlayer.mDrawRectangle.Clone();
             playerRect.Width -= 10;
-            if (playerRect.IntersectsCircle(b.Center.X, b.Center.Y, b.Radius - 10).HasValue)
+            if (playerRect.IntersectsCircle(b.Center, b.Radius - 10).HasValue)
             {
                 pPlayer.HitByBall();
                 

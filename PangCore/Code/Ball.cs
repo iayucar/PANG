@@ -38,7 +38,7 @@ namespace SMX
         /// <summary>
         /// Size of ball: XL, L, M, S
         /// </summary>
-        private eBallSize mBallSize = eBallSize.XL;
+        public eBallSize mBallSize = eBallSize.XL;
         /// <summary>
         /// Type of ball (basically colors)
         /// </summary>
@@ -63,10 +63,6 @@ namespace SMX
         /// Determines if all balls are paused
         /// </summary>
         public static bool BallsPaused = false;
-#if (!FINAL)
-        public Vector2 mCollisionSpherePos;
-        public float mCollisionSphereRadius;
-#endif
 
         #region Props
         /// <summary>
@@ -192,9 +188,9 @@ namespace SMX
         /// Returns the maximum vertical speed of balls, according to their size. This is a way to actually limit bounding height of balls
         /// </summary>
         /// <returns></returns>
-        private float GetMaxVelY()
+        public static float GetMaxVelY(eBallSize pBallSize)
         {
-            switch (mBallSize)
+            switch (pBallSize)
             {
                 case eBallSize.XL:
                     return 1100;
@@ -329,10 +325,7 @@ public override void OnFrameMove(float pDt)
             Game.CurrentLevel.GetCollisionRectangles(out hitRects);
             foreach (SMX.Maths.Rectangle rect in hitRects)
             {
-                mCollisionSphereRadius = this.Radius;
-                mCollisionSpherePos = new Maths.Vector2(mDrawRectangle.Center.X, mDrawRectangle.Center.Y);
-
-                Vector2? collNormal = rect.IntersectsCircle(mCollisionSpherePos.X, mCollisionSpherePos.Y, mCollisionSphereRadius);
+                Vector2? collNormal = rect.IntersectsCircle(this.Center, this.Radius);
                 if (collNormal.HasValue)
                 {
                     if (Math.Abs(collNormal.Value.X) > Math.Abs(collNormal.Value.Y))
@@ -354,7 +347,7 @@ public override void OnFrameMove(float pDt)
             }
 
             // Limit vertical velocity. This is a good way to control bounce height, which should be different depending on ball size
-            float limiteVelY = GetMaxVelY();
+            float limiteVelY = GetMaxVelY(mBallSize);
             if (mVelocity.Y > limiteVelY)
                 mVelocity.Y = limiteVelY;
             if (mVelocity.Y < -limiteVelY)
@@ -395,7 +388,7 @@ public override void OnFrameMove(float pDt)
             RendererBase.Ref.DrawSprite(mTextureResourceName, rect.X, rect.Y, rect.Width, rect.Height, mDrawRectangle.X, mDrawRectangle.Y, mDrawRectangle.Width, mDrawRectangle.Height);
 
 #if (!FINAL)
-            RendererBase.Ref.DrawCircle(mCollisionSpherePos.X, mCollisionSpherePos.Y, mCollisionSphereRadius, 2f, false, Color4.Yellow);
+            RendererBase.Ref.DrawCircle(this.Center.X, this.Center.Y, this.Radius, 2f, false, Color4.Yellow);
 
             List<SMX.Maths.Rectangle> hitRects;
             Game.CurrentLevel.GetCollisionRectangles(out hitRects);
