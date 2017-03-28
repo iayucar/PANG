@@ -63,6 +63,10 @@ namespace SMX
         /// Determines if all balls are paused
         /// </summary>
         public static bool BallsPaused = false;
+#if (!FINAL)
+        public Vector2 mCollisionSpherePos;
+        public float mCollisionSphereRadius;
+#endif
 
         #region Props
         /// <summary>
@@ -124,7 +128,7 @@ namespace SMX
             mBallSize = pSize;
             mBallType = pType;
 
-
+            // Create rectangles with sprite information for balls
             if (mSpriteRectangles == null || mSpriteRectangles.Count == 0)
             {
                 Dictionary<eBallSize, SMX.Maths.Rectangle> dictRed, dictBlue, dictGreen;
@@ -204,54 +208,166 @@ namespace SMX
                     return 1000;
             }
         }
-        /// <summary>
-        /// Update ball logic
-        /// </summary>
-        /// <param name="pDt"></param>
-        public override void OnFrameMove(float pDt)
+
+
+        Vector2 closestPointToRectangle(Vector2 p, Rectangle r)
+        {
+            Vector2 rectPos = new Vector2(r.Left, r.Top);
+            // relative position of p from the point 'p'
+            Vector2 d = p - rectPos;
+
+            // rectangle half-size
+            Vector2 h = new Maths.Vector2((float)r.Width / 2f, (float)r.Height / 2f);
+
+            // special case when the sphere centre is inside the rectangle
+            if (Math.Abs(d.X) < h.X && Math.Abs(d.Y) < h.Y)
+            {
+                // use left or right side of the rectangle boundary
+                // as it is the closest
+                if ((h.X - Math.Abs(d.X)) < (h.Y - Math.Abs(d.Y)))
+                {
+                    d.Y = 0.0f;
+                    d.X = h.X * Math.Sign(d.X);
+                }
+                // use top or bottom side of the rectangle boundary
+                // as it is the closest
+                else
+                {
+                    d.X = 0.0f;
+                    d.Y = h.Y * Math.Sign(d.Y);
+                }
+            }
+            else
+            {
+                // clamp to rectangle boundary
+                if (Math.Abs(d.X) > h.X) d.X = h.X * Math.Sign(d.X);
+                if (Math.Abs(d.Y) > h.Y) d.Y = h.Y * Math.Sign(d.Y);
+            }
+
+            // the closest point on rectangle from p
+            Vector2 c = rectPos + d;
+            return c;
+        }
+
+        //bool applyReponse(RigidBody& a, RigidBody& b, const Vector& mtd)
+        //{
+        //    // inverse masses (for static objects, inversemass = 0).
+        //    float ima = a.m_inverseMass;
+        //    float imb = b.m_inverseMass;
+        //    float im = ima + imb;
+        //    if (im < 0.000001f) im = 1.0f;
+
+        //    // separate the objects so they just touch each other
+        //    const float relaxation = 0.8f; // relaxation coefficient, arbitrary value in range [0, 1].
+        //    a.m_position += mtd * (ima / im) * relaxation;
+        //    b.m_position -= mtd * (imb / im) * relaxation;
+
+        //    // collision plane normal. It's the mtd vector, but normalised.
+        //    Vector n = mtd;
+        //    n.normalise();
+
+        //    // impact velocity along normal of collision 'n'
+        //    Vector v = (a.m_velocity - b.m_velocity);
+        //    float vn = v.dotProduct(n);
+
+        //    // objects already separating, no reflection
+        //    if (vn > 0.0f) return true;
+
+        //    const float cor = 0.7f; // coefficient of restitution. Arbitrary value, in range [0, 1].
+
+        //    // relative collision impulse
+        //    float j = -(1.0f + cor) * vn / (im);
+
+        //    // apply collision impulse to the two objects
+        //    a.m_velocity += n * (j * ima);
+        //    b.m_velocity -= n * (j * imb);
+
+        //    return true;
+        //}
+
+        bool collide(Rectangle r, Vector2 spherePos, float pRadius)
+        {
+            Vector2 c = closestPointToRectangle(spherePos, r);
+
+            // relative position of point from sphere centre
+            Vector2 d = (spherePos - c);
+
+            // check if point inside sphere
+            float dist2 = d.LengthSquared();// d.dotProduct(d);
+            if (dist2 >= pRadius * pRadius)
+                return false;
+
+            // minimum translation vector (vector of minimum intersection
+            // that we can use to push the objects apart so they stop intersecting).
+            float dist = (float)Math.Sqrt(dist2);
+            if (dist < 0.0000001f) return false;
+
+            Vector2 mtd = d * (pRadius - dist) / dist;
+
+            //applyReponse(s, r, mtd);
+            return true;
+        }
+
+/// <summary>
+/// Update ball logic
+/// </summary>
+/// <param name="pDt"></param>
+public override void OnFrameMove(float pDt)
         {
             RefreshDrawRectangle();
+            if (Ball.BallsPaused)
+                return;
 
+            // Integrate acceleration to get velocity differential
+            mVelocity += Game.mGravityVel_PixelsPerSecond * pDt;
 
-            if (!Ball.BallsPaused)
+            // Integrate velocity to get position differential
+            mPos += mVelocity * pDt;
+
+            // Check ball collisions
+            List<SMX.Maths.Rectangle> hitRects;
+            Game.CurrentLevel.GetCollisionRectangles(out hitRects);
+            foreach (SMX.Maths.Rectangle rect in hitRects)
             {
-                mVelocity += Game.mGravityVel_PixelsPerSecond * pDt;
+                mCollisionSphereRadius = this.Radius;
+                mCollisionSpherePos = new Maths.Vector2(mDrawRectangle.Center.X, mDrawRectangle.Center.Y);
 
-                // Esto es un buen metodo para controlar la altura de rebote. Cuando se crean las bolas, ponerles una vel.Y igual a este limite
-                float limiteVelY = GetMaxVelY();
-                if (mVelocity.Y > limiteVelY)
-                    mVelocity.Y = limiteVelY;
-                if (mVelocity.Y < -limiteVelY)
-                    mVelocity.Y = -limiteVelY;
-
-                List<SMX.Maths.Rectangle> hitRects;
-                Game.CurrentLevel.GetCollisionRectangles(out hitRects);
-                foreach (SMX.Maths.Rectangle rect in hitRects)
+                Vector2? collNormal = rect.IntersectsCircle(mCollisionSpherePos.X, mCollisionSpherePos.Y, mCollisionSphereRadius);
+                if (collNormal.HasValue)
                 {
-                    if (mDrawRectangle.Intersects(rect))
+                    if (Math.Abs(collNormal.Value.X) > Math.Abs(collNormal.Value.Y))
                     {
-                        Vector2 normal = rect.GetNormalFromPoint(mPos);
-                        if (normal.X < 0 && mVelocity.X > 0)
-                            mVelocity.X *= -1;
-                        if (normal.X > 0 && mVelocity.X < 0)
-                            mVelocity.X *= -1;
-                        if (normal.Y < 0 && mVelocity.Y > 0)
-                            mVelocity.Y *= -1;
-                        if (normal.Y > 0 && mVelocity.Y < 0)
-                            mVelocity.Y *= -1;
+                        if (collNormal.Value.X < 0)
+                            mVelocity.X = -Math.Abs(mVelocity.X);
+                        else
+                            mVelocity.X = Math.Abs(mVelocity.X);
+                    }
+                    else
+                    {
+                        if (collNormal.Value.Y <= 0)
+                            mVelocity.Y = -Math.Abs(mVelocity.Y);
+                        else
+                            mVelocity.Y = Math.Abs(mVelocity.Y);
+
                     }
                 }
-
-                // Controlar velocidad horizontal, que siempre debe ser constante
-                float maxVelHorizontal = 150;
-                if (mVelocity.X >= 0)
-                    mVelocity.X = maxVelHorizontal;
-                if (mVelocity.X < 0)
-                    mVelocity.X = -maxVelHorizontal;
-
-                // Update the position
-                mPos += mVelocity * pDt;
             }
+
+            // Limit vertical velocity. This is a good way to control bounce height, which should be different depending on ball size
+            float limiteVelY = GetMaxVelY();
+            if (mVelocity.Y > limiteVelY)
+                mVelocity.Y = limiteVelY;
+            if (mVelocity.Y < -limiteVelY)
+                mVelocity.Y = -limiteVelY;
+
+            // Set horizontal velocity, which is equal for all balls
+            float maxVelHorizontal = 150;
+            if (mVelocity.X >= 0)
+                mVelocity.X = maxVelHorizontal;
+            if (mVelocity.X < 0)
+                mVelocity.X = -maxVelHorizontal;
+
+
         }
         /// <summary>
         /// 
@@ -267,20 +383,30 @@ namespace SMX
         public override void OnFrameRender()
         {
             // Make balls blink if pause is ending
-            //if (Ball.BallsPaused && mMainForm.mGame.CurrentLevel.mPauseTime > 0 && mMainForm.mGame.CurrentLevel.mPauseTime <= 3)
-            //{
-            //    float blinker = (mMainForm.mGame.CurrentLevel.mPauseTime) % 0.4f;
-            //    if (blinker > 0.25f && blinker < 0.5f)
-            //        return;
-            //    if (blinker > 0.75f && blinker < 1f)
-            //        return;
-            //}
+            if (Ball.BallsPaused && Game.CurrentLevel.mPauseTime > 0 && Game.CurrentLevel.mPauseTime <= 3)
+            {
+                if ((int)(Game.CurrentLevel.mPauseTime * 8) % 2 == 0)
+                    return;             
+            }
 
             RefreshDrawRectangle();
 
             var rect = mSpriteRectangles[mBallType][mBallSize];
             RendererBase.Ref.DrawSprite(mTextureResourceName, rect.X, rect.Y, rect.Width, rect.Height, mDrawRectangle.X, mDrawRectangle.Y, mDrawRectangle.Width, mDrawRectangle.Height);
 
+#if (!FINAL)
+            RendererBase.Ref.DrawCircle(mCollisionSpherePos.X, mCollisionSpherePos.Y, mCollisionSphereRadius, 2f, false, Color4.Yellow);
+
+            List<SMX.Maths.Rectangle> hitRects;
+            Game.CurrentLevel.GetCollisionRectangles(out hitRects);
+            foreach (SMX.Maths.Rectangle hitrect in hitRects)
+            {
+                RendererBase.Ref.DrawLine(hitrect.X, hitrect.Y, hitrect.Right, hitrect.Top, 2f, false, Color4.RedStandard);
+                RendererBase.Ref.DrawLine(hitrect.Right, hitrect.Top, hitrect.Right, hitrect.Bottom, 2f, false, Color4.RedStandard);
+                RendererBase.Ref.DrawLine(hitrect.Right, hitrect.Bottom, hitrect.Left, hitrect.Bottom, 2f, false, Color4.RedStandard);
+                RendererBase.Ref.DrawLine(hitrect.Left, hitrect.Bottom, hitrect.Left, hitrect.Top, 2f, false, Color4.RedStandard);
+            }
+#endif
         }
         /// <summary>
         /// Creates and configures a ball from an XML node

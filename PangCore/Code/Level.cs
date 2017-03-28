@@ -91,17 +91,19 @@ namespace SMX
         /// Collection of collision rectangles for the level (typically a set of rectangles to specify the bounds of the screen)
         /// </summary>        
         private List<SMX.Maths.Rectangle> mLevelRectangles = new List<Rectangle>();
-
+        /// <summary>
+        /// All levels have a bricks border. This is the width/height of that border
+        /// </summary>
+        public static int sLevelBorder = 50;
 
         public Level()
         {
 
             // Add screen borders so things bounce off
-            int border = 50;
-            mLevelRectangles.Add(new Rectangle(0, 0, border, Game.DefaultGameHeight));
-            mLevelRectangles.Add(new Rectangle(Game.DefaultGameWidth - border, 0, border, Game.DefaultGameHeight));
-            mLevelRectangles.Add(new Rectangle(0, 0, Game.DefaultGameWidth, border));
-            mLevelRectangles.Add(new Rectangle(0, Game.DefaultGameHeight - border, Game.DefaultGameWidth, border));
+            mLevelRectangles.Add(new Rectangle(0, 0, sLevelBorder, Game.DefaultGameHeight));
+            mLevelRectangles.Add(new Rectangle(Game.DefaultGameWidth - sLevelBorder, 0, sLevelBorder, Game.DefaultGameHeight));
+            mLevelRectangles.Add(new Rectangle(0, 0, Game.DefaultGameWidth, sLevelBorder));
+            mLevelRectangles.Add(new Rectangle(0, Game.DefaultGameHeight - sLevelBorder, Game.DefaultGameWidth, sLevelBorder));
 
         }
         /// <summary>
@@ -144,7 +146,7 @@ namespace SMX
         {
             Rectangle arrowRect = a.mDrawRectangle.Clone();
             arrowRect.Width -= 10;
-            if (arrowRect.IntersectsCircle(b.Center, b.Radius))
+            if (arrowRect.IntersectsCircle(b.Center.X, b.Center.Y, b.Radius).HasValue)
             {
                 ArrowDied(a);
 
@@ -269,7 +271,7 @@ namespace SMX
             // Leave some margin to be less strict in the intersections
             Rectangle playerRect = pPlayer.mDrawRectangle.Clone();
             playerRect.Width -= 10;
-            if (playerRect.IntersectsCircle(b.Center, b.Radius - 10))
+            if (playerRect.IntersectsCircle(b.Center.X, b.Center.Y, b.Radius - 10).HasValue)
             {
                 pPlayer.HitByBall();
                 
@@ -355,7 +357,7 @@ namespace SMX
                 p.OnFrameMove(pDt);
 
                 // Check if player collects the prize
-                if (p.mDrawRectangle.Intersects(Game.mPlayer.mDrawRectangle))
+                if (Game.mPlayer.State != Player.eState.Dying && p.mDrawRectangle.Intersects(Game.mPlayer.mDrawRectangle))
                 {
                     Game.mPlayer.CollectPrize(p.mType);
 

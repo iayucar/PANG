@@ -60,6 +60,7 @@
     <Compile Include="Input\Enums.cs" />
     <Compile Include="Input\InputBase.cs" />
     <Compile Include="Maths\Color4.cs" />
+    <Compile Include="Maths\IntersectionInfo.cs" />
     <Compile Include="Maths\MethodExtenders.cs" />
     <Compile Include="Maths\Point.cs" />
     <Compile Include="Maths\Rectangle.cs" />

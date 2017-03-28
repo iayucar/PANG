@@ -87,6 +87,12 @@ namespace SMX
         /// Private counter to control how much time we have been in Dying State
         /// </summary>
         private float mTimeDying = 0;
+        /// <summary>
+        /// Private vector to simulate bouncing when dying
+        /// </summary>
+        private Vector2 mDyingVelocity = Vector2.One;
+        private Vector2 mDyingVelocityInitial = new Vector2(300, -500);
+
 
 
 
@@ -101,6 +107,9 @@ namespace SMX
                 {
                     StateChanged(oldval, mState);
                 }
+
+                if (mState == eState.Dying)
+                    mDyingVelocity = mDyingVelocityInitial;
             }
         }
         
@@ -294,6 +303,17 @@ namespace SMX
             {
                 // No movement when dying
                 mVelocity = Vector2.Zero;
+                mDyingVelocity += Game.mGravityVel_PixelsPerSecond * pDt;
+                mPos += mDyingVelocity * pDt;
+                if (mPos.Y >= Game.DefaultGameHeight - mDrawRectangle.Height - Level.sLevelBorder)
+                    mDyingVelocity.Y = mDyingVelocityInitial.Y;
+                if (mPos.Y <= 0)
+                    mDyingVelocity.Y = -mDyingVelocityInitial.Y;
+                if (mPos.X >= Game.DefaultGameWidth - mDrawRectangle.Width - Level.sLevelBorder)
+                    mDyingVelocity.X = -mDyingVelocityInitial.X;
+                if (mPos.X <= 0)
+                    mDyingVelocity.X = mDyingVelocityInitial.X;
+
 
                 // Check if dying animation ended
                 mTimeDying += pDt;

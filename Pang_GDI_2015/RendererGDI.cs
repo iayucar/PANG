@@ -138,6 +138,27 @@ namespace SMX
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="pX"></param>
+        /// <param name="pY"></param>
+        /// <param name="pRadius"></param>
+        /// <param name="pColor"></param>
+        public override void DrawCircle(float pX, float pY, float pRadius, float pWidth, bool pDashed, Maths.Color4 pColor)
+        {
+            SMX.Maths.Vector2 start = GetScreenCoords(pX, pY);
+            SMX.Maths.Vector2 radScreen = GetScreenCoords(pRadius, pRadius);
+
+
+            Pen pen = new Pen(pColor.ToGDI(), pWidth);
+            if (pDashed)
+                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            else pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+
+            mGraphics.DrawEllipse(pen, start.X, start.Y, radScreen.X, radScreen.Y);
+          
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="pText"></param>
         /// <param name="pSize"></param>
         /// <param name="pX"></param>

@@ -188,6 +188,16 @@ namespace SMX
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="pX"></param>
+        /// <param name="pY"></param>
+        /// <param name="pRadius"></param>
+        /// <param name="pColor"></param>
+        public virtual void DrawCircle(float pX, float pY, float pRadius, float pWidth, bool pDashed, SMX.Maths.Color4 pColor)
+        {
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="pText"></param>
         /// <param name="pSize"></param>
         /// <param name="pX"></param>

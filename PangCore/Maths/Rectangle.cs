@@ -216,13 +216,13 @@ namespace SMX.Maths
             hitTime = 0.0f;
 
             // Return early if a & b are already overlapping
-            if (a.Intersects(b)) 
+            if (a.Intersects(b))
                 return false;
 
             // Treat b as stationary, so invert v to get relative velocity
             v = -v;
 
-            
+
             float outTime = 1.0f;
             Vector2 overlapTime = Vector2.Zero;
 
@@ -294,36 +294,51 @@ namespace SMX.Maths
             }
 
             return true;
-        }        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="p"></param>
-        /// <param name="pRadius"></param>
-        /// <returns></returns>
-        public bool IntersectsCircle(Vector2 pCenter, float pRad)
-        {
-            float w = this.Width / 2;
-            float h = this.Height / 2;
-            var rectangleCenter = new Vector2(this.X + w, this.Y + h);
-
-            var dx = Math.Abs(pCenter.X - rectangleCenter.X);
-            var dy = Math.Abs(pCenter.Y - rectangleCenter.Y);
-
-            if (dx > (pRad + w) || dy > (pRad + h)) 
-                return false;
-
-            float circleDistanceX = Math.Abs(pCenter.X - this.X - w);
-            float circleDistanceY = Math.Abs(pCenter.Y - this.Y - h);
-            //hacer las colisiones con esto
-            if (circleDistanceX <= w || circleDistanceY <= h)
-                return true;
-
-            var cornerDistanceSq = Math.Pow(circleDistanceX - w, 2) + Math.Pow(circleDistanceY - h, 2);
-            return (cornerDistanceSq <= pRad * pRad);
         }
+
         /// <summary>
-        /// Obtiene la normal que se corresponde a la cara más cercana del rect al punto "point"
+        /// Determines if the rectangle is intersecting with a circle, and return the collision normal if so
+        /// </summary>
+        /// <param name="circle_x"></param>
+        /// <param name="circle_y"></param>
+        /// <param name="circle_r"></param>
+        /// <returns></returns>
+        public Vector2? IntersectsCircle(float circle_x, float circle_y, float circle_r)
+        {
+            // compute a center-to-center vector
+            Vector2 half = new Vector2((float)this.Width / 2f, (float)this.Height / 2f);
+            Vector2 center = new Vector2(circle_x - ((float)this.X + half.X), circle_y - ((float)this.Y + half.Y));
+            Vector2 side = new Maths.Vector2(Math.Abs(center.X) - half.X, Math.Abs(center.Y) - half.Y);
+
+            if (side.X > circle_r || side.Y > circle_r) // outside
+                return null;
+            if (side.X < -circle_r && side.Y < -circle_r) // inside
+                return new Vector2(0, 1);
+            if (side.X < 0 || side.Y < 0) // intersects side or corner
+            {
+                float dxx = 0, dyy = 0;
+                if (Math.Abs(side.X) <= circle_r && side.Y < 0)
+                    dxx = center.X * side.X < 0 ? -1 : 1;
+                else if (Math.Abs(side.Y) <= circle_r && side.X < 0)
+                    dyy = center.Y * side.Y < 0 ? -1 : 1;
+
+                return new Vector2(dxx, dyy);
+            }
+
+            // circle is near the corner
+            bool isbounce = side.X * side.X + side.Y * side.Y < circle_r * circle_r;
+            if (!isbounce)
+                return null;
+            
+            float norm = (float)Math.Sqrt(side.X * side.X + side.Y * side.Y);
+            float dx = center.X < 0 ? -1 : 1;
+            float dy = center.Y < 0 ? -1 : 1;
+
+            return new Vector2(dx * side.X / norm, dy * side.Y / norm);
+
+        } 
+        /// <summary>
+        /// Gets the normal corresponding to the closest rectangle face to a point
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>

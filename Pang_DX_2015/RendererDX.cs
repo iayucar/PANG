@@ -374,6 +374,33 @@ namespace SMX
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="pX"></param>
+        /// <param name="pY"></param>
+        /// <param name="pRadius"></param>
+        /// <param name="pColor"></param>
+        public override void DrawCircle(float pX, float pY, float pRadius, float pWidth, bool pDashed, Maths.Color4 pColor)
+        {
+            SolidColorBrush brush = new SolidColorBrush(mRenderTarget2D, pColor.ToSDX());
+            SharpDX.Vector2 start = GetScreenCoords(pX, pY).ToSDX();
+            SMX.Maths.Vector2 radScreen = GetScreenCoords(pRadius, pRadius);
+
+            if (pDashed)
+            {
+                StrokeStyleProperties props = new StrokeStyleProperties();
+                props.DashCap = CapStyle.Flat;
+                props.EndCap = CapStyle.Flat;
+                props.StartCap = CapStyle.Flat;
+                props.DashOffset = 0;
+                props.DashStyle = DashStyle.Dash;
+                props.LineJoin = LineJoin.Round;
+                SharpDX.Direct2D1.StrokeStyle strokeStyle = new StrokeStyle(mFactory2D, props);
+                mRenderTarget2D.DrawEllipse(new Ellipse(start, radScreen.X, radScreen.X), brush, pWidth, strokeStyle);
+            }
+            else mRenderTarget2D.DrawEllipse(new Ellipse(start, radScreen.X, radScreen.X), brush, pWidth);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="pText"></param>
         /// <param name="pSize"></param>
         /// <param name="pX"></param>
