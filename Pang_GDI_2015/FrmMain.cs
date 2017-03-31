@@ -40,6 +40,7 @@ namespace SMX
     {
         public RendererBase mRenderer;
         public InputBase mInput;
+        public SoundBase mSound;
 
         /// <summary>
         /// 
@@ -54,7 +55,7 @@ namespace SMX
             // Initialize API-Dependent stuff
             mRenderer = new RendererGDI();
             mInput = new InputGDI();
-            
+            mSound = new SoundBase();
 
             Game.LoadContents();
             Game.GameOver += Game_GameOver;

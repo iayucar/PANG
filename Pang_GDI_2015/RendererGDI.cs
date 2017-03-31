@@ -151,7 +151,8 @@ namespace SMX
                 pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
             else pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
 
-            mGraphics.DrawEllipse(pen, start.X, start.Y, radScreen.X, radScreen.Y);
+            float width = radScreen.X * 2;
+            mGraphics.DrawEllipse(pen, start.X - width /2, start.Y - width / 2, width, width);
           
         }
         /// <summary>
